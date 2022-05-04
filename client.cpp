@@ -8,21 +8,45 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
+#include <unistd.h>
 #define PORT 8080
 
 using namespace std;
 
-int main(int argc, char const* argv[])
+int main(int argc, char **argv)
 {
-	int sock = 0, valread;
+	int sockfd = 0, valread;
 	struct sockaddr_in serv_addr;
-	char* request = "GET https://localhost:8080/greeting?name=Bobby\r\n\r\n";
+	string name = "test-client"; //default
 	char buffer[1024] = { 0 };
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	int ch;
+	bool n = false;
+
+	//get name from user
+	while((ch = getopt(argc, argv, "n:")) != -1){
+    switch (ch){
+      case 'n':
+        name = strdup(optarg);
+        n = true;
+        break;
+      default:
+        printf("usage: ./client [-n name]\n");
+        break;
+    }
+  }
+
+	//combine name into our request
+	string req = "GET https://localhost:8080/greeting?client_name=" +  name + "\r\n\r\n";
+	char* request = new char[req.length()];
+	strncpy(request, req.c_str(), req.length());
+
+	//create socket with IPv4(domain), TCP (reliable type), IP (protocol)
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		cout << "Socket creation error" << endl;
 		exit(1);
 	}
 
+	//server info
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(PORT);
 
@@ -34,15 +58,18 @@ int main(int argc, char const* argv[])
 		exit(1);
 	}
 
-	if (connect(sock, (struct sockaddr*)&serv_addr,
+	//connect our socket to server address
+	if (connect(sockfd, (struct sockaddr*)&serv_addr,
 				sizeof(serv_addr))
 		< 0) {
 		cout << "Connection failed." << endl;
 		exit(1);
 	}
-	send(sock, request, strlen(request), 0);
 
-	valread = read(sock, buffer, 1024);
+	//send request to server
+	send(sockfd, request, strlen(request), 0);
+
+	valread = read(sockfd, buffer, 1024);
 
   //did we read anything from server?
   if(valread < 0){
@@ -51,7 +78,11 @@ int main(int argc, char const* argv[])
   }
   else{
     //success!
-    printf("Message from server: %s\n", buffer);
+    printf("[server]: %s\n", buffer);
   }
+
+	//free mem
+	free(request);
+
 	return 0;
 }
