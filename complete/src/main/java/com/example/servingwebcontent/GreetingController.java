@@ -28,7 +28,7 @@ public class GreetingController{
 		return "Hi " + client_name + ", it's " + date_time + " over here!";
 	}
 
-	//another way to return just a string as http response!
+	//another way to return just a string as a http response!
 	/*
 	@GetMapping("/greeting")
 	public ResponseEntity<String> greeting(@RequestParam(name="client_name", required=false, defaultValue="World") String client_name, Model model) {
