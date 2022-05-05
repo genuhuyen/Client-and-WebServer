@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseBody;
-import java.util.Date;
+import java.util.LocalDateTime; //changed from date to local date to make it more emcompassing for different time zones
 import java.text.SimpleDateFormat;
 
 @Controller
@@ -19,8 +19,8 @@ public class GreetingController{
 		model.addAttribute("client_name", client_name);
 
 		//handling datetime
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date date = new Date();
+		private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //private b/c we don't want this to change
+		LocalDateTime date = new LocalDateTime();
 		String date_time = formatter.format(date);
 		model.addAttribute("date_time", date_time);
 
@@ -33,7 +33,7 @@ public class GreetingController{
 	@GetMapping("/greeting")
 	public ResponseEntity<String> greeting(@RequestParam(name="client_name", required=false, defaultValue="World") String client_name, Model model) {
 		model.addAttribute("name", client_name);
-		SimpleDateFormat formatter = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date();
 		String date_time = formatter.format(date);
 		return new ResponseEntity<>("Hi " + client_name + ", it's " + date_time + " over here!", HttpStatus.OK);
